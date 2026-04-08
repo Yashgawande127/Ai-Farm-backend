@@ -1,0 +1,48 @@
+# Flask Backend for Crop Recommendation System
+# Python dependencies for the application
+
+# Core Flask framework
+Flask>=3.0.0
+flask-cors>=4.0.0
+
+# MongoDB and database
+pymongo>=4.6.0
+flask-pymongo>=2.3.0
+mongoengine>=0.27.0
+
+# Data processing and machine learning
+pandas>=2.1.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+scipy>=1.11.0
+
+# Deep Learning dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Development and utilities
+python-dotenv>=1.0.0
+Werkzeug>=3.0.0
+
+# Logging and monitoring
+colorlog>=6.7.0
+
+# Optional: For enhanced JSON handling
+ujson>=5.8.0
+
+# Authentication and security
+flask-jwt-extended>=4.6.0
+werkzeug>=3.0.0
+bcrypt>=4.1.0
+
+# Email validation
+email-validator>=2.1.0
+
+# Optional: For better performance
+gunicorn>=21.2.0
+
+# Testing (optional for development)
+pytest>=7.4.2
+pytest-flask>=1.2.0
+requests>=2.31.0
