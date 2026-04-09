@@ -64,32 +64,38 @@ def create_app(config_name=None):
     # Ensure model directory exists
     os.makedirs('models', exist_ok=True)
     
-    # Check if models exist, if not train them
-    models_exist = (
-        os.path.exists('models/crop_model.pkl') and
-        os.path.exists('models/random_forest_model.pkl') and
-        os.path.exists('models/decision_tree_model.pkl')
-    )
-    
-    if not models_exist:
-        logger.info("Some models are missing. Training new models...")
-        try:
-            results = train_model()
-            logger.info(f"Initial models trained correctly")
-        except Exception as e:
-            logger.error(f"Failed to train initial models: {str(e)}")
-    
-    # Load all models into prediction service
+    # Initialize models
     try:
-        prediction_service.load_all_models()
-        logger.info("All models loaded successfully into prediction service")
+        # Check if all required ensemble models exist
+        models_dir = 'models'
+        ensemble_exists = (
+            os.path.exists(os.path.join(models_dir, 'random_forest_model.pkl')) and
+            os.path.exists(os.path.join(models_dir, 'decision_tree_model.pkl'))
+        )
+        
+        if ensemble_exists:
+            logger.info("Pre-trained ensemble models found. Loading...")
+            prediction_service.load_all_models()
+        else:
+            # Check if we should auto-train
+            is_render = os.environ.get('RENDER') == 'true'
+            if is_render:
+                logger.warning("Models missing on Render. Skipping auto-training to avoid timeout.")
+                logger.info("Please train locally and push the .pkl files to GitHub.")
+                # Try to load whatever is available
+                prediction_service.load_all_models()
+            else:
+                logger.info("Models missing. Training new models...")
+                try:
+                    results = train_model()
+                    prediction_service.load_all_models()
+                except Exception as train_error:
+                    logger.error(f"Failed to train models: {train_error}")
+        
     except Exception as e:
-        logger.warning(f"Could not load all models: {str(e)}")
-        # Fallback to loading just the default model
-        try:
-            prediction_service.load_model()
-        except Exception as fallback_error:
-            logger.error(f"Could not load any model: {fallback_error}")
+        logger.warning(f"Model initialization issue: {str(e)}")
+
+    return app, prediction_service, logger
 
     return app, prediction_service, logger
 

@@ -32,9 +32,9 @@ logs/
 # Environment variables
 .env
 
-# Models and Data
-models/*.pkl
-models/*.json
+# Models and Data (Now included for deployment)
+# models/*.pkl
+# models/*.json
 !models/.gitkeep
 
 # IDEs
