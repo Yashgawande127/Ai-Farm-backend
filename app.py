@@ -59,6 +59,36 @@ def create_app(config_name=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(auth_bp)
     
+    # Ensure model directory exists
+    os.makedirs('models', exist_ok=True)
+    
+    # Check if models exist, if not train them
+    models_exist = (
+        os.path.exists('models/crop_model.pkl') and
+        os.path.exists('models/random_forest_model.pkl') and
+        os.path.exists('models/decision_tree_model.pkl')
+    )
+    
+    if not models_exist:
+        logger.info("Some models are missing. Training new models...")
+        try:
+            results = train_model()
+            logger.info(f"Initial models trained correctly")
+        except Exception as e:
+            logger.error(f"Failed to train initial models: {str(e)}")
+    
+    # Load all models into prediction service
+    try:
+        prediction_service.load_all_models()
+        logger.info("All models loaded successfully into prediction service")
+    except Exception as e:
+        logger.warning(f"Could not load all models: {str(e)}")
+        # Fallback to loading just the default model
+        try:
+            prediction_service.load_model()
+        except Exception as fallback_error:
+            logger.error(f"Could not load any model: {fallback_error}")
+
     return app, prediction_service, logger
 
 # Create app instance
@@ -114,44 +144,5 @@ def train_model_endpoint():
         }), 500
 
 if __name__ == '__main__':
-    # Ensure model directory exists
-    os.makedirs('models', exist_ok=True)
-    
-    # Check if models exist, if not train them
-    models_exist = (
-        os.path.exists('models/crop_model.pkl') and
-        os.path.exists('models/random_forest_model.pkl') and
-        os.path.exists('models/decision_tree_model.pkl')
-    )
-    
-    if not models_exist:
-        logger.info("Some models are missing. Training new models...")
-        try:
-            results = train_model()
-            logger.info(f"Initial models trained:")
-            logger.info(f"Random Forest accuracy: {results['random_forest_accuracy']:.4f}")
-            logger.info(f"Decision Tree accuracy: {results['decision_tree_accuracy']:.4f}")
-            logger.info(f"Best model: {results['best_model']}")
-        except Exception as e:
-            logger.error(f"Failed to train initial models: {str(e)}")
-    
-    # Load all models into prediction service
-    try:
-        prediction_service.load_all_models()
-        logger.info("All models loaded successfully")
-        
-        # Show available models
-        available = prediction_service.get_available_models()
-        logger.info(f"Available models: {available}")
-        
-    except Exception as e:
-        logger.warning(f"Could not load all models: {str(e)}")
-        # Fallback to loading just the default model
-        try:
-            prediction_service.load_model()
-            logger.info("Default model loaded as fallback")
-        except Exception as fallback_error:
-            logger.error(f"Could not load any model: {fallback_error}")
-    
     # Run the Flask app
     app.run(debug=True, host='0.0.0.0', port=5000)
