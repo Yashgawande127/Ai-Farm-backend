@@ -11,6 +11,7 @@ from auth_routes import auth_bp
 from config import get_config
 from utils import setup_logging, health_check
 from database_service import DatabaseService
+from financial_routes import financial_bp
 
 def create_app(config_name=None):
     """Application factory pattern"""
@@ -58,6 +59,7 @@ def create_app(config_name=None):
     # Register blueprints
     app.register_blueprint(api_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(financial_bp)
     
     # Ensure model directory exists
     os.makedirs('models', exist_ok=True)

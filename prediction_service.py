@@ -49,24 +49,32 @@ class CropPredictionService:
     def load_all_models(self):
         """Load all available models (Random Forest and Decision Tree) and feature extractors"""
         try:
+            # Determine models directory path
+            models_dir = os.path.dirname(self.model_path) if self.model_path else 'models'
+            logger.info(f"Loading all models from directory: {models_dir}")
+            
             # Load Random Forest model
-            rf_path = 'models/random_forest_model.pkl'
+            rf_path = os.path.join(models_dir, 'random_forest_model.pkl')
             if os.path.exists(rf_path):
                 with open(rf_path, 'rb') as f:
                     self.rf_model = pickle.load(f)
                 logger.info("Random Forest model loaded successfully")
+            else:
+                logger.warning(f"Random Forest model not found at {rf_path}")
             
             # Load Decision Tree model
-            dt_path = 'models/decision_tree_model.pkl'
+            dt_path = os.path.join(models_dir, 'decision_tree_model.pkl')
             if os.path.exists(dt_path):
                 with open(dt_path, 'rb') as f:
                     self.dt_model = pickle.load(f)
                 logger.info("Decision Tree model loaded successfully")
+            else:
+                logger.warning(f"Decision Tree model not found at {dt_path}")
             
             # Load feature extractors (scaler and KPCA model)
-            scaler_path = 'models/feature_scaler.pkl'
-            kpca_path = 'models/kpca_model.pkl'
-            ranges_path = 'models/feature_ranges.pkl'
+            scaler_path = os.path.join(models_dir, 'feature_scaler.pkl')
+            kpca_path = os.path.join(models_dir, 'kpca_model.pkl')
+            ranges_path = os.path.join(models_dir, 'feature_ranges.pkl')
             
             if os.path.exists(scaler_path):
                 with open(scaler_path, 'rb') as f:
@@ -77,17 +85,17 @@ class CropPredictionService:
                 with open(kpca_path, 'rb') as f:
                     self.kpca_model = pickle.load(f)
                 logger.info("KPCA model loaded successfully")
-
+            
             if os.path.exists(ranges_path):
                 with open(ranges_path, 'rb') as f:
                     self.feature_ranges = pickle.load(f)
                 logger.info("Feature ranges loaded successfully")
             else:
                 self.feature_ranges = None
-                logger.warning("Feature ranges file not found. Domain initialization might be compromised.")
+                logger.warning(f"Feature ranges file not found at {ranges_path}")
             
             # Load model comparison results
-            comparison_path = 'models/model_comparison.json'
+            comparison_path = os.path.join(models_dir, 'model_comparison.json')
             if os.path.exists(comparison_path):
                 with open(comparison_path, 'r') as f:
                     self.model_comparison = json.load(f)
@@ -136,13 +144,16 @@ class CropPredictionService:
     def load_model_comparison(self):
         """Load model comparison results"""
         try:
-            comparison_path = 'models/model_comparison.json'
+            # Determine models directory path
+            models_dir = os.path.dirname(self.model_path) if self.model_path else 'models'
+            comparison_path = os.path.join(models_dir, 'model_comparison.json')
+            
             if os.path.exists(comparison_path):
                 with open(comparison_path, 'r') as f:
                     self.model_comparison = json.load(f)
                 return self.model_comparison
             else:
-                logger.warning("Model comparison file not found")
+                logger.warning(f"Model comparison file not found at {comparison_path}")
                 return None
         except Exception as e:
             logger.error(f"Error loading model comparison: {str(e)}")
