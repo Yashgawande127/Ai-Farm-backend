@@ -23,10 +23,10 @@ def load_data():
     """Load and preprocess the crop recommendation dataset"""
     try:
         # Load the CSV file
-        data_path = '../Crop_recommendation.csv'
+        data_path = 'Crop_recommendation.csv'
         if not os.path.exists(data_path):
-            # Try alternative path if running from different directory
-            data_path = 'Crop_recommendation.csv'
+            # Try parent directory for local development compatibility
+            data_path = '../Crop_recommendation.csv'
         
         df = pd.read_csv(data_path)
         logger.info(f"Dataset loaded successfully with shape: {df.shape}")
